@@ -1,0 +1,9 @@
+# Ignore ZIP files
+*.zip
+
+# Ignore F-Droid indexes
+*.xml
+
+# Ignore Android apps and PGP signatures
+*.apk
+*.asc
