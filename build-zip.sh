@@ -3,19 +3,13 @@ set -e
 
 #_______________________________________________________________________________
 #                              Configurations
-ZIP_PREFIX='microg'
+ZIP_FLAVOUR=${1:-'microg'} #default to microg
+
+ZIP_PREFIX="$ZIP_FLAVOUR"
+CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 apps_config() {
-# Format is as follows, one app per line:
-#repository packageid apkname installpath
-cat <<EOF
-microg com.google.android.gms GmsCore /system/priv-app
-microg com.google.android.gsf GmsFrameworkProxy /system/priv-app
-microg com.android.vending FakeStore /system/app
-microg org.microg.gms.droidguard DroidGuardHelper /system/app
-fdroid org.microg.nlp.backend.ichnaea MozillaNlpBackend /system/app
-fdroid org.microg.nlp.backend.nominatim NominatimNlpBackend /system/app
-EOF
+  sed -e '/^#/d' "$CONFIG_FILE"
 }
 
 #_______________________________________________________________________________
