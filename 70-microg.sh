@@ -9,11 +9,17 @@
 
 list_files() {
 cat <<EOF
+priv-app/GmsCore.apk
 priv-app/GmsCore/GmsCore.apk
+priv-app/GmsFrameworkProxy.apk
 priv-app/GmsFrameworkProxy/GmsFrameworkProxy.apk
+app/FakeStore.apk
 app/FakeStore/FakeStore.apk
+app/DroidGuardHelper.apk
 app/DroidGuardHelper/DroidGuardHelper.apk
+app/MozillaNlpBackend.apk
 app/MozillaNlpBackend/MozillaNlpBackend.apk
+app/NominatimNlpBackend.apk
 app/NominatimNlpBackend/NominatimNlpBackend.apk
 EOF
 }
