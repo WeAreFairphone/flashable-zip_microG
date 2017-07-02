@@ -8,6 +8,8 @@ ZIP_FLAVOUR=${1:-'microg'} #default to microg
 ZIP_PREFIX="$ZIP_FLAVOUR"
 CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
+ADDOND_FILE='70-microg.sh' #common to all flavours
+
 apps_config() {
   sed -e '/^#/d' "$CONFIG_FILE"
 }
@@ -116,11 +118,17 @@ apps_config | awk '{print $1}' | uniq | xargs -l bash -c 'download_repo_index $@
 echo "~~~ Downloading apps"
 apps_config | xargs -l bash -c 'download_app $@' -
 
+echo "~~~ Making OTA survival script"
+cat templates/addond-head > $ADDOND_FILE
+apps_config | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> $ADDOND_FILE
+cat templates/addond-tail >> $ADDOND_FILE
+
 echo "~~~ Packing up"
 generate_zip $ZIP_PREFIX
 
 echo "~~~ Cleaning up"
 apps_config | awk '{print $1 ".xml"}' | uniq | xargs -l rm --verbose
-apps_config | awk '{print substr($4, 2) "/" $3 "/" $3 ".apk"}' | uniq | xargs rm --verbose
+rm --verbose -r system/
+rm --verbose $ADDOND_FILE
 
 echo "~~~ Finished"
