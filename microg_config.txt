@@ -1,8 +1,0 @@
-# Format is as follows, one app per line:
-#repository packageid apkname installpath
-microg com.google.android.gms GmsCore /system/priv-app
-microg com.google.android.gsf GmsFrameworkProxy /system/priv-app
-microg com.android.vending FakeStore /system/app
-microg org.microg.gms.droidguard DroidGuardHelper /system/app
-fdroid org.microg.nlp.backend.ichnaea MozillaNlpBackend /system/app
-fdroid org.microg.nlp.backend.nominatim NominatimNlpBackend /system/app

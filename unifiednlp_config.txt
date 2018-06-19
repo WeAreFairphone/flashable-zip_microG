@@ -1,5 +1,0 @@
-# Format is as follows, one app per line:
-#repository packageid apkname installpath
-fdroid com.google.android.gms UnifiedNlp /system/priv-app
-fdroid org.microg.nlp.backend.ichnaea MozillaNlpBackend /system/app
-fdroid org.microg.nlp.backend.nominatim NominatimNlpBackend /system/app
