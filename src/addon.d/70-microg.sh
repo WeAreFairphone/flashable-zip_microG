@@ -1,3 +1,15 @@
+#!/sbin/sh
+#
+# /system/addon.d/70-microg.sh
+# During a system upgrade, this script backs up microG apps,
+# /system is formatted and reinstalled, then the files are restored.
+#
+
+. /tmp/backuptool.functions
+
+list_files() {
+cat <<EOF
+%PLACEHOLDER%
 EOF
 }
 
