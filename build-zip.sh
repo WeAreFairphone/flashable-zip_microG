@@ -106,7 +106,7 @@ function generate_zip() {
   --quiet \
   --recurse-path $ZIP_NAME \
   $ZIP_FILES \
-  --exclude '*.asc' '*.xml' '*_config.txt'
+  --exclude '*.asc' '*.xml' '*_config.txt' 'templates/*'
   echo "Result: $ZIP_NAME"
 }
 
