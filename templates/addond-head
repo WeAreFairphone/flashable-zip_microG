@@ -9,3 +9,4 @@
 
 list_files() {
 cat <<EOF
+/etc/permissions/privapp-permissions-microg.xml

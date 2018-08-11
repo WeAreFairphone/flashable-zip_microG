@@ -2,7 +2,7 @@
 *.zip
 
 # Ignore F-Droid indexes
-*.xml
+*_index.xml
 
 # Ignore Android apps and PGP signatures
 *.apk

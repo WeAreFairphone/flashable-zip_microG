@@ -24,6 +24,7 @@ echo -n -e 'ui_print Getting ready...\n' > /proc/self/fd/$2
 WORK_FOLDER='microg'
 ZIP_FILE="$3"
 ADDOND='70-microg.sh'
+PRIVAPP_PERMISSIONS='privapp-permissions-microg.xml'
 
 cd /tmp
 mkdir $WORK_FOLDER
@@ -75,6 +76,13 @@ echo "$TARGET_DIRS" | xargs -n 1 chmod 755
 echo -n -e 'ui_print Installing OTA survival script...\n' > /proc/self/fd/$2
 
 cp ${ADDOND} /system/addon.d/
+
+if [ "${BUILD_VERSION_SDK_INT}" -ge 27 ]
+then # Android 8+ require an explicit permission whitelist file for privileged apps
+  echo -n -e 'ui_print Whitelisting privapp permissions...\n' > /proc/self/fd/$2
+
+  cp ${PRIVAPP_PERMISSIONS} /system/etc/permissions/
+fi
 
 echo -n -e 'ui_print done\n' > /proc/self/fd/$2
 echo -n -e 'ui_print\n' > /proc/self/fd/$2

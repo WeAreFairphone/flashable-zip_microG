@@ -1,0 +1,9 @@
+<!--
+  This XML file declares which signature|privileged permissions should be
+  granted to privileged applications that come with the platform
+-->
+<permissions>
+    <privapp-permissions package="com.google.android.gms">
+        <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
+    </privapp-permissions>
+</permission>

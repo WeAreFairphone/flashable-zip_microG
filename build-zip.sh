@@ -42,7 +42,7 @@ function get_repo_base_url() {
 
 function download_repo_index() {
   local DL_URL="$(get_repo_base_url $1)/index.xml"
-  local FILE_NAME="$1.xml"
+  local FILE_NAME="$1_index.xml"
 
   fetch $DL_URL $FILE_NAME
 } && export -f download_repo_index
@@ -63,7 +63,7 @@ function get_stable_versioncode() {
 } && export -f get_stable_versioncode
 
 function get_app_filename() {
-  local INDEX_FILE="$1.xml"
+  local INDEX_FILE="$1_index.xml"
   local PACKAGE_ID=$2
 
   local VERSION_CODE=$(get_stable_versioncode $INDEX_FILE $PACKAGE_ID)
@@ -106,7 +106,7 @@ function generate_zip() {
   --quiet \
   --recurse-path $ZIP_NAME \
   $ZIP_FILES \
-  --exclude '*.asc' '*.xml' '*_config.txt' 'templates/*'
+  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*'
   echo "Result: $ZIP_NAME"
 }
 
@@ -127,7 +127,7 @@ echo "~~~ Packing up"
 generate_zip $ZIP_PREFIX
 
 echo "~~~ Cleaning up"
-apps_config | awk '{print $1 ".xml"}' | uniq | xargs -l rm --verbose
+apps_config | awk '{print $1 "_index.xml"}' | uniq | xargs -l rm --verbose
 rm --verbose -r system/
 rm --verbose $ADDOND_FILE
 
