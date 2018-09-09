@@ -39,7 +39,7 @@ On Debian/Ubuntu systems, run `sudo apt install xmlstarlet`
 
 Run the `build-zip.sh` shell script:
 ```
-source build-zip.sh
+./build-zip.sh
 ```
 
 This will generate a `microg_YYYY-MM-DD.zip` file.
@@ -50,14 +50,14 @@ You can **add you own flavour** just by writing a `<newflavour>_config.txt` file
 
 `build-zip.sh` accepts a single `<flavour>` string argument. Each flavour has a `<flavour>_config.txt` file.
 ```
-source build-zip.sh <flavour>
+./build-zip.sh <flavour>
 ```
 
 This will generate a `<flavour>_YYYY-MM-DD.zip` file.
 
 For example, to build the `unifiednlp` flavour, run:
 ```
-source build-zip.sh unifiednlp
+./build-zip.sh unifiednlp
 ```
 
 This will generate a `unifiednlp_YYYY-MM-DD.zip` file.
