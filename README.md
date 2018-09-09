@@ -21,9 +21,9 @@ adb sideload <flashable-zip-name>
 Alternatively, copy the resulting ZIP to your device storage, restart your device into recovery and use the GUI `Install` or `Install ZIP` option.
 
 
-### Attention: 
+### Note for UnifiedNLP on Android Oreo
 
-After reboot you need to go to "Location settings" (tap and hold the notification bar quick-setting for toggling location), and at the bottom (“Location services”)  launching it. Their you need to configure location backends (you the location backend first) by selection one or a couple. 
+In Oreo, the UnifiedNlp app is launched in a different way than before. After reboot, you need to go to "Location settings" in **Settings** &rarr; **Security and Privacy** &rarr; **Location Settings**, or by tapping and holding the notification bar quick-setting for toggling location. Then, at the bottom ("Location services"), you can launch **UnifiedNlp settings**. There you need to enable at least one location backend for network location to work, as usual. If you chose the `minimal` ZIP flavour, you need to install your preferred location backends first, e.g. from [F-Droid](https://staging.f-droid.org/search?q=UnifiedNlp+backend).
 
 
 Build
