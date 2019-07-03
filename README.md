@@ -31,7 +31,7 @@ Build
 
 ### Requirements
 
-On some systems: `findutils`, `wget` is needed. Busybox won't work.
+On some systems: `findutils` `gawk` `zip` `wget` need to be manually installed. Busybox won't work.
 
 [XMLStarlet](http://xmlstar.sourceforge.net/download.php) is needed to parse F-Droid-like repo indexes.
 
