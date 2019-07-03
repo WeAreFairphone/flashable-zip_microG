@@ -35,7 +35,7 @@ Build
 
 On Debian/Ubuntu systems, run `sudo apt install xmlstarlet`
 
-On Archlinux, run `sudo pacman -S xmlstarlet`
+On Arch Linux, run `sudo pacman -S xmlstarlet`
 
 ### Build ZIP
 
