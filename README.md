@@ -31,6 +31,8 @@ Build
 
 ### Requirements
 
+On some systems: `findutils`, `wget` is needed. Busybox won't work.
+
 [XMLStarlet](http://xmlstar.sourceforge.net/download.php) is needed to parse F-Droid-like repo indexes.
 
 On Debian/Ubuntu systems, run `sudo apt install xmlstarlet`
