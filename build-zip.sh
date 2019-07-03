@@ -51,7 +51,7 @@ function xpath_exec() {
   local INDEX_FILE=$1
   local XPATH_CMD="$2"
 
-  xmlstarlet select -t -v "$XPATH_CMD" $INDEX_FILE
+  xml select -t -v "$XPATH_CMD" $INDEX_FILE
 } && export -f xpath_exec
 
 ## Applications
