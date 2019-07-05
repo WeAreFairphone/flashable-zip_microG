@@ -10,21 +10,14 @@ CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 ADDOND_FILE='70-microg.sh' #common to all flavours
 
-apps_config() {
-  sed -e '/^#/d' "$CONFIG_FILE"
-}
-
 #_______________________________________________________________________________
 #                             Exported functions
 function fetch() {
-  local URL=$1
-  local FILENAME=$2
+  local URL="$1"
+  local FILENAME="$2"
 
-  wget \
-  --no-verbose \
-  --output-document=$FILENAME \
-  $URL
-} && export -f fetch
+  curl -o "$FILENAME" "$URL"
+}
 
 ## Repositories
 function get_repo_base_url() {
@@ -38,62 +31,65 @@ function get_repo_base_url() {
   esac
 
   echo $BASE_URL
-} && export -f get_repo_base_url
+}
 
 function download_repo_index() {
-  local DL_URL="$(get_repo_base_url $1)/index.xml"
+  local DL_URL="$(get_repo_base_url "$1")/index.xml"
   local FILE_NAME="$1_index.xml"
 
-  fetch $DL_URL $FILE_NAME
-} && export -f download_repo_index
+  fetch "$DL_URL" "$FILE_NAME"
+}
 
 function xpath_exec() {
-  local INDEX_FILE=$1
+  local INDEX_FILE="$1"
   local XPATH_CMD="$2"
 
-  xmlstarlet select -t -v "$XPATH_CMD" $INDEX_FILE
-} && export -f xpath_exec
+  xmlstarlet select -t -v "$XPATH_CMD" "$INDEX_FILE" | head -1
+}
 
 ## Applications
-function get_stable_versioncode() {
-  local INDEX_FILE=$1
-  local PACKAGE_ID=$2
+function get_stable_version() {
+  local INDEX_FILE="$1"
+  local PACKAGE_ID="$2"
 
-  xpath_exec $INDEX_FILE "/fdroid/application[@id = '$PACKAGE_ID']/marketvercode"
-} && export -f get_stable_versioncode
+  xpath_exec "$INDEX_FILE" "/fdroid/application[@id = '$PACKAGE_ID']/marketversion"
+}
 
 function get_app_filename() {
   local INDEX_FILE="$1_index.xml"
-  local PACKAGE_ID=$2
+  local PACKAGE_ID="$2"
+  local XML_QUALIFICATION="$3"
 
-  local VERSION_CODE=$(get_stable_versioncode $INDEX_FILE $PACKAGE_ID)
+  local VERSION="$(get_stable_version "$INDEX_FILE" "$PACKAGE_ID")"
 
-  xpath_exec $INDEX_FILE "/fdroid/application[@id = '$PACKAGE_ID']/package[versioncode = '$VERSION_CODE']/apkname"
-} && export -f get_app_filename
+  xpath_exec "$INDEX_FILE" "/fdroid/application[@id = '$PACKAGE_ID']/package[version = '$VERSION']$XML_QUALIFICATION/apkname"
+}
 
 function get_app_download_url() {
-  local REPO_NAME=$1
-  local PACKAGE_ID=$2
+  local REPO_NAME="$1"
+  local PACKAGE_ID="$2"
+  local XML_QUALIFICATION="$3"
 
-  local REPO_URL=$(get_repo_base_url $REPO_NAME)
+  local REPO_URL="$(get_repo_base_url "$REPO_NAME")"
 
-  echo "$REPO_URL/$(get_app_filename $REPO_NAME $PACKAGE_ID)"
-} && export -f get_app_download_url
+  echo "$REPO_URL/$(get_app_filename "$REPO_NAME" "$PACKAGE_ID" "$XML_QUALIFICATION")"
+}
 
 function download_app() {
-  local REPO_NAME=$1
-  local PACKAGE_ID=$2
-  local APK_NAME=$3
-  local INSTALL_PATH=$4
+  local REPO_NAME="$1"
+  local PACKAGE_ID="$2"
+  local APK_NAME="$3"
+  local INSTALL_PATH="$4"
+  local XML_QUALIFICATION="$5"
 
-  local DL_URL=$(get_app_download_url $REPO_NAME $PACKAGE_ID)
-  local DL_PATH=${INSTALL_PATH:1}/$APK_NAME
-  local DL_FILE=$DL_PATH/$APK_NAME.apk
+  local DL_URL="$(get_app_download_url "$REPO_NAME" "$PACKAGE_ID" "$XML_QUALIFICATION")"
+  local DL_PATH="./$INSTALL_PATH/$APK_NAME"
+  local DL_FILE="$DL_PATH/$APK_NAME.apk"
 
-  mkdir --parents $DL_PATH
-  fetch $DL_URL $DL_FILE
+  mkdir -p "$DL_PATH"
+  fetch "$DL_URL" "$DL_FILE"
   #fetch $DL_URL.asc $DL_FILE.asc
-} && export -f download_app
+}
 
 #_______________________________________________________________________________
 #                              Inner functions
@@ -113,10 +109,17 @@ function generate_zip() {
 #_______________________________________________________________________________
 #                                 Main
 echo "~~~ Downloading repo indexes"
-apps_config | awk '{print $1}' | uniq | xargs -l bash -c 'download_repo_index $@' -
+download_repo_index fdroid
+download_repo_index microg
 
 echo "~~~ Downloading apps"
-apps_config | xargs -l bash -c 'download_app $@' -
+fdroid() {
+  download_app fdroid "$@"
+}
+microg() {
+  download_app microg "$@"
+}
+. "$CONFIG_FILE"
 
 echo "~~~ Making OTA survival script"
 cat templates/addond-head > $ADDOND_FILE
