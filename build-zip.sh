@@ -16,7 +16,7 @@ function fetch() {
   local URL="$1"
   local FILENAME="$2"
 
-  curl -o "$FILENAME" "$URL"
+  curl --output "$FILENAME" "$URL"
 }
 
 ## Repositories
