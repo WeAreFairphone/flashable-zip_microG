@@ -106,12 +106,9 @@ for repo in "${!REPO_BASE_URLS[@]}"; do
 done
 
 echo "~~~ Downloading apps"
-fdroid() {
-  download_app fdroid "$@"
-}
-microg() {
-  download_app microg "$@"
-}
+for repo in "${!REPO_BASE_URLS[@]}"; do
+  eval "$repo(){ download_app fdroid \"\$@\"; }"
+done
 . "$CONFIG_FILE"
 
 echo "~~~ Making OTA survival script"
