@@ -20,21 +20,10 @@ function fetch() {
 }
 
 ## Repositories
-function get_repo_base_url() {
-  case $1 in
-    'fdroid' )
-      local BASE_URL='https://f-droid.org/repo'
-      ;;
-    'microg' )
-      local BASE_URL='https://microg.org/fdroid/repo'
-      ;;
-  esac
-
-  echo $BASE_URL
-}
+REPO_BASE_URLS=(['fdroid']='https://f-droid.org/repo' ['microg']='https://microg.org/fdroid/repo')
 
 function download_repo_index() {
-  local DL_URL="$(get_repo_base_url "$1")/index.xml"
+  local DL_URL="${REPO_BASE_URLS[$1]}/index.xml"
   local FILE_NAME="$1_index.xml"
 
   fetch "$DL_URL" "$FILE_NAME"
@@ -70,7 +59,7 @@ function get_app_download_url() {
   local PACKAGE_ID="$2"
   local XML_QUALIFICATION="$3"
 
-  local REPO_URL="$(get_repo_base_url "$REPO_NAME")"
+  local REPO_URL="${REPO_BASE_URLS[$REPO_NAME]}"
 
   echo "$REPO_URL/$(get_app_filename "$REPO_NAME" "$PACKAGE_ID" "$XML_QUALIFICATION")"
 }
