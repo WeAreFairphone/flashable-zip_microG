@@ -107,7 +107,7 @@ done
 
 echo "~~~ Downloading apps"
 for repo in "${!REPO_BASE_URLS[@]}"; do
-  eval "$repo(){ download_app fdroid \"\$@\"; }"
+  eval "$repo(){ download_app \"$repo\" \"\$@\"; }"
 done
 . "$CONFIG_FILE"
 
