@@ -80,7 +80,6 @@ function download_app() {
 
   mkdir --parents "$DL_PATH"
   fetch "$DL_URL" "$DL_FILE"
-  #fetch $DL_URL.asc $DL_FILE.asc
 }
 
 #_______________________________________________________________________________
