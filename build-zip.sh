@@ -78,7 +78,7 @@ function download_app() {
   local DL_PATH="./$INSTALL_PATH/$APK_NAME"
   local DL_FILE="$DL_PATH/$APK_NAME.apk"
 
-  mkdir -p "$DL_PATH"
+  mkdir --parents "$DL_PATH"
   fetch "$DL_URL" "$DL_FILE"
   #fetch $DL_URL.asc $DL_FILE.asc
 }
@@ -123,7 +123,7 @@ echo "~~~ Cleaning up"
 for repo in "${!REPO_BASE_URLS[@]}"; do
   rm --verbose "$repo_index.xml"
 done
-rm --verbose -r system/
+rm --verbose --recursive system/
 rm --verbose "$ADDOND_FILE"
 
 echo "~~~ Finished"
