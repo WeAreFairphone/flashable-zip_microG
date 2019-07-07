@@ -20,7 +20,7 @@ function fetch() {
 }
 
 ## Repositories
-REPO_BASE_URLS=(['fdroid']='https://f-droid.org/repo' ['microg']='https://microg.org/fdroid/repo')
+declare -A REPO_BASE_URLS=(['fdroid']='https://f-droid.org/repo' ['microg']='https://microg.org/fdroid/repo')
 
 function download_repo_index() {
   local DL_URL="${REPO_BASE_URLS[$1]}/index.xml"
@@ -101,8 +101,9 @@ function generate_zip() {
 #_______________________________________________________________________________
 #                                 Main
 echo "~~~ Downloading repo indexes"
-download_repo_index fdroid
-download_repo_index microg
+for repo in "${!REPO_BASE_URLS[@]}"; do
+  download_repo_index "$repo"
+done
 
 echo "~~~ Downloading apps"
 fdroid() {
