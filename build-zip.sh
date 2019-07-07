@@ -80,7 +80,10 @@ function download_app() {
   local PACKAGE_ID="$2"
   local APK_NAME="$3"
   local INSTALL_PATH="$4"
-  local XML_QUALIFICATION="$5"
+  local NATIVECODE="$5"
+  local XML_QUALIFICATION=""
+  
+  [ -n "$NATIVECODE" ] && XML_QUALIFICATION="[nativecode = '$NATIVECODE']"
 
   local DL_URL="$(get_app_download_url "$REPO_NAME" "$PACKAGE_ID" "$XML_QUALIFICATION")"
   local DL_PATH="./$INSTALL_PATH/$APK_NAME"
