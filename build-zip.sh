@@ -134,7 +134,7 @@ echo "~~~ Cleaning up"
 for repo in "${!REPO_BASE_URLS[@]}"; do
   rm --verbose "$repo_index.xml"
 done
-rm --verbose --recursive system/
+rm --verbose --recursive ./system/
 rm --verbose "$ADDOND_FILE"
 
 echo "~~~ Finished"
