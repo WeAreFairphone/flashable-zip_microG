@@ -117,7 +117,9 @@ done
 echo "~~~ Downloading apps and Making OTA survival script"
 function download_app_extern() {
     download_app "$@"
-    echo "$@" | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> "$ADDOND_FILE"
+    local PATH="${4##/system/}"
+    echo "$PATH/$3.apk" >> "$ADDOND_FILE"
+    echo "$PATH/$3/$3.apk" >> "$ADDOND_FILE"
 }
 for repo in "${!REPO_BASE_URLS[@]}"; do
   eval "$repo(){ download_app_extern \"$repo\" \"\$@\"; }"
