@@ -21,7 +21,7 @@ function fetch() {
   local URL="$1"
   local FILENAME="$2"
 
-  curl --output "$FILENAME" "$URL" ||fail
+  curl --output "$FILENAME" "$URL" || fail
 }
 
 ## Repositories
@@ -40,7 +40,7 @@ function xpath_exec() {
   local ret=""
 
   xmlstarlet select -t -v "$XPATH_CMD" "$INDEX_FILE" | {
-    read ret
+    read ret || fail
     read && fail
     echo "$ret"
   }
@@ -88,7 +88,7 @@ function download_app() {
   local DL_PATH="./$INSTALL_PATH/$APK_NAME"
   local DL_FILE="$DL_PATH/$APK_NAME.apk"
 
-  mkdir --parents "$DL_PATH"
+  mkdir --parents "$DL_PATH" || fail
   fetch "$DL_URL" "$DL_FILE"
 }
 
@@ -103,7 +103,7 @@ function generate_zip() {
   --quiet \
   --recurse-path $ZIP_NAME \
   $ZIP_FILES \
-  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*' ||fail
+  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*' || fail
   echo "Result: $ZIP_NAME"
 }
 
