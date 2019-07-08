@@ -114,15 +114,16 @@ for repo in "${!REPO_BASE_URLS[@]}"; do
   download_repo_index "$repo"
 done
 
-echo "~~~ Downloading apps"
+echo "~~~ Downloading apps and Making OTA survival script"
+function download_app_extern() {
+    download_app "$@"
+    echo "$@" | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> "$ADDOND_FILE"
+}
 for repo in "${!REPO_BASE_URLS[@]}"; do
-  eval "$repo(){ download_app \"$repo\" \"\$@\"; }"
+  eval "$repo(){ download_app_extern \"$repo\" \"\$@\"; }"
 done
-. "$CONFIG_FILE"
-
-echo "~~~ Making OTA survival script"
 cat templates/addond-head > "$ADDOND_FILE"
-apps_config | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> "$ADDOND_FILE"
+. "$CONFIG_FILE"
 cat templates/addond-tail >> "$ADDOND_FILE"
 
 echo "~~~ Packing up"
