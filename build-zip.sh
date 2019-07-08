@@ -37,6 +37,7 @@ function download_repo_index() {
 function xpath_exec() {
   local INDEX_FILE="$1"
   local XPATH_CMD="$2"
+
   local ret=""
 
   xmlstarlet select -t -v "$XPATH_CMD" "$INDEX_FILE" | {
