@@ -57,9 +57,12 @@ function get_stable_version() {
 function get_app_filename() {
   local INDEX_FILE="$1_index.xml"
   local PACKAGE_ID="$2"
-  local XML_QUALIFICATION="$3"
+  local NATIVECODE="$3"
 
   local VERSION="$(get_stable_version "$INDEX_FILE" "$PACKAGE_ID")"
+
+  local XML_QUALIFICATION=""
+  [ -n "$NATIVECODE" ] && XML_QUALIFICATION="[nativecode = '$NATIVECODE']"
 
   xpath_exec "$INDEX_FILE" "/fdroid/application[@id = '$PACKAGE_ID']/package[version = '$VERSION']$XML_QUALIFICATION/apkname"
 }
@@ -67,11 +70,11 @@ function get_app_filename() {
 function get_app_download_url() {
   local REPO_NAME="$1"
   local PACKAGE_ID="$2"
-  local XML_QUALIFICATION="$3"
+  local NATIVECODE="$3"
 
   local REPO_URL="${REPO_BASE_URLS[$REPO_NAME]}"
 
-  echo "$REPO_URL/$(get_app_filename "$REPO_NAME" "$PACKAGE_ID" "$XML_QUALIFICATION")"
+  echo "$REPO_URL/$(get_app_filename "$REPO_NAME" "$PACKAGE_ID" "$NATIVECODE")"
 }
 
 function download_app() {
@@ -80,11 +83,8 @@ function download_app() {
   local APK_NAME="$3"
   local INSTALL_PATH="$4"
   local NATIVECODE="$5"
-  local XML_QUALIFICATION=""
-  
-  [ -n "$NATIVECODE" ] && XML_QUALIFICATION="[nativecode = '$NATIVECODE']"
 
-  local DL_URL="$(get_app_download_url "$REPO_NAME" "$PACKAGE_ID" "$XML_QUALIFICATION")"
+  local DL_URL="$(get_app_download_url "$REPO_NAME" "$PACKAGE_ID" "$NATIVECODE")"
   local DL_PATH="./$INSTALL_PATH/$APK_NAME"
   local DL_FILE="$DL_PATH/$APK_NAME.apk"
 
