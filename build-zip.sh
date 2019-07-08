@@ -10,13 +10,18 @@ CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 ADDOND_FILE='70-microg.sh' #common to all flavours
 
+function fail() {
+  echo Failed. >&2
+  exit 1 # Sometimes cannot quit (e.g. `$(...)`)
+}
+
 #_______________________________________________________________________________
 #                             Exported functions
 function fetch() {
   local URL="$1"
   local FILENAME="$2"
 
-  curl --output "$FILENAME" "$URL"
+  curl --output "$FILENAME" "$URL" ||fail
 }
 
 ## Repositories
@@ -32,8 +37,13 @@ function download_repo_index() {
 function xpath_exec() {
   local INDEX_FILE="$1"
   local XPATH_CMD="$2"
+  local ret=""
 
-  xmlstarlet select -t -v "$XPATH_CMD" "$INDEX_FILE" | head -1
+  xmlstarlet select -t -v "$XPATH_CMD" "$INDEX_FILE" | {
+    read ret
+    read && fail
+    echo "$ret"
+  }
 }
 
 ## Applications
