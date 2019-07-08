@@ -12,7 +12,7 @@ ADDOND_FILE='70-microg.sh' #common to all flavours
 
 function fail() {
   echo Failed. >&2
-  exit 1 # Sometimes cannot quit (e.g. `$(...)`)
+  exit 1 # Sometimes cannot exit (e.g. `$(...)`)
 }
 
 #_______________________________________________________________________________
@@ -103,7 +103,7 @@ function generate_zip() {
   --quiet \
   --recurse-path $ZIP_NAME \
   $ZIP_FILES \
-  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*'
+  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*' ||fail
   echo "Result: $ZIP_NAME"
 }
 
