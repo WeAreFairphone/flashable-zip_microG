@@ -10,22 +10,22 @@ CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 ADDOND_FILE='70-microg.sh' #common to all flavours
 
+## Repositories
+declare -A REPO_BASE_URLS=(['fdroid']='https://f-droid.org/repo' ['microg']='https://microg.org/fdroid/repo')
+
+#_______________________________________________________________________________
+#                                 functions
 function fail() {
   echo Failed. >&2
   exit 1 # Sometimes cannot exit (e.g. `$(...)`)
 }
 
-#_______________________________________________________________________________
-#                             Exported functions
 function fetch() {
   local URL="$1"
   local FILENAME="$2"
 
   curl --output "$FILENAME" "$URL" || fail
 }
-
-## Repositories
-declare -A REPO_BASE_URLS=(['fdroid']='https://f-droid.org/repo' ['microg']='https://microg.org/fdroid/repo')
 
 function download_repo_index() {
   local DL_URL="${REPO_BASE_URLS[$1]}/index.xml"
@@ -92,8 +92,6 @@ function download_app() {
   fetch "$DL_URL" "$DL_FILE"
 }
 
-#_______________________________________________________________________________
-#                              Inner functions
 function generate_zip() {
   local ZIP_NAME="$1_$(date +%Y-%m-%d).zip"
 
