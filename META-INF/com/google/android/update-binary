@@ -36,7 +36,7 @@ mount /system
 # A/B system-as-root devices have the actual system partition
 # mounted under /system/system when in the recovery.
 # Snippet taken from F-Droid Privileged Extension.
-system_as_root=`getprop ro.build.system_root_image`
+system_as_root="$(getprop ro.build.system_root_image)"
 if [ "$system_as_root" == "true"  ]; then
   SYSTEM="/system/system"
 fi
