@@ -25,7 +25,7 @@ WORK_FOLDER='microg'
 ZIP_FILE="$3"
 ADDOND='70-microg.sh'
 PRIVAPP_PERMISSIONS='privapp-permissions-microg.xml'
-SYSTEM="/system"
+SYSTEM_ROOT="/system"
 
 cd /tmp
 mkdir $WORK_FOLDER
@@ -38,13 +38,13 @@ mount /system
 # Snippet taken from F-Droid Privileged Extension.
 SYSTEM_AS_ROOT="$(getprop ro.build.system_root_image)"
 if [ "$SYSTEM_AS_ROOT" == "true"  ]; then
-  SYSTEM="/system/system"
+  SYSTEM_ROOT="/system/system"
 fi
 
 echo -n -e 'ui_print Installing apps...\n' > /proc/self/fd/$2
 
 # Prepare work folder
-BUILD_VERSION_SDK="$(grep -F ro.build.version.sdk ${SYSTEM}/build.prop)"
+BUILD_VERSION_SDK="$(grep -F ro.build.version.sdk ${SYSTEM_ROOT}/build.prop)"
 BUILD_VERSION_SDK_INT="${BUILD_VERSION_SDK#*=}"
 if [ "${BUILD_VERSION_SDK_INT}" -ge 21 ]
 then # each apk has its own subdirectory in /system/priv-app or /system/app
@@ -75,20 +75,20 @@ echo "$TARGET_APKS" | xargs -n 1 rm -f
 echo "$TARGET_DIRS" | xargs -n 1 rm -rf
 
 # Copy new files and fix permissions
-cp -r system/* ${SYSTEM}/
+cp -r system/* ${SYSTEM_ROOT}/
 echo "$TARGET_APKS" | xargs -n 1 chmod 644
 echo "$TARGET_DIRS" | xargs -n 1 chmod 755
 
 
 echo -n -e 'ui_print Installing OTA survival script...\n' > /proc/self/fd/$2
 
-cp ${ADDOND} ${SYSTEM}/addon.d/
+cp ${ADDOND} ${SYSTEM_ROOT}/addon.d/
 
 if [ "${BUILD_VERSION_SDK_INT}" -ge 27 ]
 then # Android 8+ require an explicit permission whitelist file for privileged apps
   echo -n -e 'ui_print Whitelisting privapp permissions...\n' > /proc/self/fd/$2
 
-  cp ${PRIVAPP_PERMISSIONS} ${SYSTEM}/etc/permissions/
+  cp ${PRIVAPP_PERMISSIONS} ${SYSTEM_ROOT}/etc/permissions/
 fi
 
 echo -n -e 'ui_print done\n' > /proc/self/fd/$2
