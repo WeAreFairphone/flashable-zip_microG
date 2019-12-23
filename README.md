@@ -31,13 +31,13 @@ Build
 
 ### Requirements
 
-On some systems (e.g. Termux, Alpine Linux): `findutils` `gawk` `zip` `wget` `bash` need to be manually installed. Busybox won't work.
-
 [XMLStarlet](http://xmlstar.sourceforge.net/download.php) is needed to parse F-Droid-like repo indexes.
 
 On Debian/Ubuntu systems, run `sudo apt install xmlstarlet`
 
 On Arch Linux, run `sudo pacman -S xmlstarlet`
+
+Furthermore, on some barebones, Busybox-based systems (like Termux or Alpine Linux), the following packages need to be manually installed: 'bash', `findutils`, `gawk`, `wget`, 'zip'
 
 ### Build ZIP
 
