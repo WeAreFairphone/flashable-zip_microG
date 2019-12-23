@@ -37,6 +37,8 @@ On Debian/Ubuntu systems, run `sudo apt install xmlstarlet`
 
 On Arch Linux, run `sudo pacman -S xmlstarlet`
 
+Furthermore, on some barebones, Busybox-based systems (like Termux or Alpine Linux), the following packages need to be manually installed: `bash`, `findutils`, `gawk`, `wget`, `zip`
+
 ### Build ZIP
 
 Run the `build-zip.sh` shell script:
