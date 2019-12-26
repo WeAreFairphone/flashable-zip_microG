@@ -10,93 +10,89 @@ CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 ADDOND_FILE='70-microg.sh' #common to all flavours
 
-apps_config() {
-  sed -e '/^#/d' "$CONFIG_FILE"
-}
+## Repositories
+declare -A REPO_BASE_URLS=(['fdroid']='https://f-droid.org/repo' ['microg']='https://microg.org/fdroid/repo')
 
 #_______________________________________________________________________________
-#                             Exported functions
+#                                 functions
+function fail() {
+  echo Failed. >&2
+  exit 1 # Sometimes cannot exit (e.g. `$(...)`)
+}
+
 function fetch() {
-  local URL=$1
-  local FILENAME=$2
+  local URL="$1"
+  local FILENAME="$2"
 
-  wget \
-  --no-verbose \
-  --output-document=$FILENAME \
-  $URL
-} && export -f fetch
-
-## Repositories
-function get_repo_base_url() {
-  case $1 in
-    'fdroid' )
-      local BASE_URL='https://f-droid.org/repo'
-      ;;
-    'microg' )
-      local BASE_URL='https://microg.org/fdroid/repo'
-      ;;
-  esac
-
-  echo $BASE_URL
-} && export -f get_repo_base_url
+  curl --output "$FILENAME" "$URL" || fail
+}
 
 function download_repo_index() {
-  local DL_URL="$(get_repo_base_url $1)/index.xml"
+  local DL_URL="${REPO_BASE_URLS[$1]}/index.xml"
   local FILE_NAME="$1_index.xml"
 
-  fetch $DL_URL $FILE_NAME
-} && export -f download_repo_index
+  fetch "$DL_URL" "$FILE_NAME"
+}
 
 function xpath_exec() {
-  local INDEX_FILE=$1
+  local INDEX_FILE="$1"
   local XPATH_CMD="$2"
 
-  xmlstarlet select -t -v "$XPATH_CMD" $INDEX_FILE
-} && export -f xpath_exec
+  local ret=""
+
+  xmlstarlet select -t -v "$XPATH_CMD" "$INDEX_FILE" | {
+    read ret || fail
+    read && fail
+    echo "$ret"
+  }
+}
 
 ## Applications
-function get_stable_versioncode() {
-  local INDEX_FILE=$1
-  local PACKAGE_ID=$2
+function get_stable_version() {
+  local INDEX_FILE="$1"
+  local PACKAGE_ID="$2"
 
-  xpath_exec $INDEX_FILE "/fdroid/application[@id = '$PACKAGE_ID']/marketvercode"
-} && export -f get_stable_versioncode
+  xpath_exec "$INDEX_FILE" "/fdroid/application[@id = '$PACKAGE_ID']/marketversion"
+}
 
 function get_app_filename() {
   local INDEX_FILE="$1_index.xml"
-  local PACKAGE_ID=$2
+  local PACKAGE_ID="$2"
+  local NATIVECODE="$3"
 
-  local VERSION_CODE=$(get_stable_versioncode $INDEX_FILE $PACKAGE_ID)
+  local VERSION="$(get_stable_version "$INDEX_FILE" "$PACKAGE_ID")"
 
-  xpath_exec $INDEX_FILE "/fdroid/application[@id = '$PACKAGE_ID']/package[versioncode = '$VERSION_CODE']/apkname"
-} && export -f get_app_filename
+  local XML_QUALIFICATION=""
+  [ -n "$NATIVECODE" ] && XML_QUALIFICATION="[nativecode = '$NATIVECODE']"
+
+  xpath_exec "$INDEX_FILE" "/fdroid/application[@id = '$PACKAGE_ID']/package[version = '$VERSION']$XML_QUALIFICATION/apkname"
+}
 
 function get_app_download_url() {
-  local REPO_NAME=$1
-  local PACKAGE_ID=$2
+  local REPO_NAME="$1"
+  local PACKAGE_ID="$2"
+  local NATIVECODE="$3"
 
-  local REPO_URL=$(get_repo_base_url $REPO_NAME)
+  local REPO_URL="${REPO_BASE_URLS[$REPO_NAME]}"
 
-  echo "$REPO_URL/$(get_app_filename $REPO_NAME $PACKAGE_ID)"
-} && export -f get_app_download_url
+  echo "$REPO_URL/$(get_app_filename "$REPO_NAME" "$PACKAGE_ID" "$NATIVECODE")"
+}
 
 function download_app() {
-  local REPO_NAME=$1
-  local PACKAGE_ID=$2
-  local APK_NAME=$3
-  local INSTALL_PATH=$4
+  local REPO_NAME="$1"
+  local PACKAGE_ID="$2"
+  local APK_NAME="$3"
+  local INSTALL_PATH="$4"
+  local NATIVECODE="$5"
 
-  local DL_URL=$(get_app_download_url $REPO_NAME $PACKAGE_ID)
-  local DL_PATH=${INSTALL_PATH:1}/$APK_NAME
-  local DL_FILE=$DL_PATH/$APK_NAME.apk
+  local DL_URL="$(get_app_download_url "$REPO_NAME" "$PACKAGE_ID" "$NATIVECODE")"
+  local DL_PATH="./$INSTALL_PATH/$APK_NAME"
+  local DL_FILE="$DL_PATH/$APK_NAME.apk"
 
-  mkdir --parents $DL_PATH
-  fetch $DL_URL $DL_FILE
-  #fetch $DL_URL.asc $DL_FILE.asc
-} && export -f download_app
+  mkdir --parents "$DL_PATH" || fail
+  fetch "$DL_URL" "$DL_FILE"
+}
 
-#_______________________________________________________________________________
-#                              Inner functions
 function generate_zip() {
   local ZIP_NAME="$1_$(date +%Y-%m-%d).zip"
 
@@ -106,29 +102,39 @@ function generate_zip() {
   --quiet \
   --recurse-path $ZIP_NAME \
   $ZIP_FILES \
-  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*'
+  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*' || fail
   echo "Result: $ZIP_NAME"
 }
 
 #_______________________________________________________________________________
 #                                 Main
 echo "~~~ Downloading repo indexes"
-apps_config | awk '{print $1}' | uniq | xargs -l bash -c 'download_repo_index $@' -
+for repo in "${!REPO_BASE_URLS[@]}"; do
+  download_repo_index "$repo"
+done
 
-echo "~~~ Downloading apps"
-apps_config | xargs -l bash -c 'download_app $@' -
-
-echo "~~~ Making OTA survival script"
-cat templates/addond-head > $ADDOND_FILE
-apps_config | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> $ADDOND_FILE
-cat templates/addond-tail >> $ADDOND_FILE
+echo "~~~ Downloading apps and Making OTA survival script"
+function download_app_extern() {
+    download_app "$@"
+    local PATH="${4##/system/}"
+    echo "$PATH/$3.apk" >> "$ADDOND_FILE"
+    echo "$PATH/$3/$3.apk" >> "$ADDOND_FILE"
+}
+for repo in "${!REPO_BASE_URLS[@]}"; do
+  eval "$repo(){ download_app_extern \"$repo\" \"\$@\"; }"
+done
+cat templates/addond-head > "$ADDOND_FILE"
+. "$CONFIG_FILE"
+cat templates/addond-tail >> "$ADDOND_FILE"
 
 echo "~~~ Packing up"
-generate_zip $ZIP_PREFIX
+generate_zip "$ZIP_PREFIX"
 
 echo "~~~ Cleaning up"
-apps_config | awk '{print $1 "_index.xml"}' | uniq | xargs -l rm --verbose
-rm --verbose -r system/
-rm --verbose $ADDOND_FILE
+for repo in "${!REPO_BASE_URLS[@]}"; do
+  rm --verbose "$repo_index.xml"
+done
+rm --verbose --recursive ./system/
+rm --verbose "$ADDOND_FILE"
 
 echo "~~~ Finished"
