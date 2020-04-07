@@ -35,9 +35,14 @@ unzip -o "$ZIP_FILE"
 mount /system
 # A/B system-as-root devices have the actual system partition
 # mounted under /system/system when in the recovery.
-# Snippet taken from F-Droid Privileged Extension.
+# All Android 10 devices act as system-as-root devices.
 SYSTEM_AS_ROOT="$(getprop ro.build.system_root_image)"
-if [ "$SYSTEM_AS_ROOT" == "true"  ]; then
+if [ "$SYSTEM_AS_ROOT" == "true" ]
+then # we are on an Android Pie device with A/B system-as-root layout
+  SYSTEM_ROOT="/system/system"
+elif [ -f "/system/system/build.prop" ]
+then # we are on an Android 10 device
+  SYSTEM_AS_ROOT="true"
   SYSTEM_ROOT="/system/system"
 fi
 
