@@ -9,10 +9,16 @@ ZIP_PREFIX="$ZIP_FLAVOUR"
 CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 ADDOND_FILE='70-microg.sh' #common to all flavours
+PERMISSIONS_FILE='privapp-permissions-microg.xml'
 
 apps_config() {
-  sed -e '/^#/d' "$CONFIG_FILE"
+  sed -e '/^#/d' -e '/^package_name/d' "$CONFIG_FILE"
 }
+
+package_name() {
+  awk '/^package_name/ {print $2}' "$CONFIG_FILE"
+}
+PACKAGE_NAME=$(package_name)
 
 #_______________________________________________________________________________
 #                             Exported functions
@@ -106,7 +112,7 @@ function generate_zip() {
   --quiet \
   --recurse-path $ZIP_NAME \
   $ZIP_FILES \
-  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*'
+  --exclude '*.asc' '*_index.xml' '*_config.txt' 'templates/*' '*.zip'
   echo "Result: $ZIP_NAME"
 }
 
@@ -123,6 +129,10 @@ cat templates/addond-head > $ADDOND_FILE
 apps_config | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> $ADDOND_FILE
 cat templates/addond-tail >> $ADDOND_FILE
 
+echo "~~~ Making permission-file"
+echo $PACKAGE_NAME
+sed "s/@package_name@/${PACKAGE_NAME}/" templates/${PERMISSIONS_FILE} > ${PERMISSIONS_FILE}
+
 echo "~~~ Packing up"
 generate_zip $ZIP_PREFIX
 
@@ -130,5 +140,6 @@ echo "~~~ Cleaning up"
 apps_config | awk '{print $1 "_index.xml"}' | uniq | xargs -l rm --verbose
 rm --verbose -r system/
 rm --verbose $ADDOND_FILE
+rm --verbose ${PERMISSIONS_FILE}
 
 echo "~~~ Finished"

@@ -1,0 +1,4 @@
+# Format is as follows, one app per line:
+#repository packageid apkname installpath
+package_name org.microg.nlp
+fdroid org.microg.nlp UnifiedNlp /system/priv-app

@@ -1,5 +1,6 @@
 # Format is as follows, one app per line:
 #repository packageid apkname installpath
+package_name com.google.android.gms
 microg com.google.android.gms GmsCore /system/priv-app
 microg com.google.android.gsf GmsFrameworkProxy /system/priv-app
 microg com.android.vending FakeStore /system/app

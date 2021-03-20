@@ -1,3 +1,4 @@
 # Format is as follows, one app per line:
 #repository packageid apkname installpath
+package_name com.google.android.gms
 fdroid com.google.android.gms UnifiedNlp /system/priv-app

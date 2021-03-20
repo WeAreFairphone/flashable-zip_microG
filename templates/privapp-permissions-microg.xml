@@ -3,7 +3,7 @@
   granted to privileged applications that come with the platform
 -->
 <permissions>
-    <privapp-permissions package="com.google.android.gms">
+    <privapp-permissions package="@package_name@">
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
         <permission name="android.permission.ACCESS_COARSE_LOCATION"></permission>
         <permission name="android.permission.ACCESS_COARSE_UPDATES"></permission>
