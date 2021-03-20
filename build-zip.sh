@@ -10,6 +10,8 @@ CONFIG_FILE="${ZIP_FLAVOUR}_config.txt"
 
 ADDOND_FILE='70-microg.sh' #common to all flavours
 PERMISSIONS_FILE='privapp-permissions-microg.xml'
+OVERLAY_PATH_ON_SYSTEM='vendor/overlay'
+OVERLAY_FILENAME='UnifiedNlpOverlay.apk'
 
 apps_config() {
   sed -e '/^#/d' -e '/^package_name/d' "$CONFIG_FILE"
@@ -123,10 +125,21 @@ apps_config | awk '{print $1}' | uniq | xargs -l bash -c 'download_repo_index $@
 
 echo "~~~ Downloading apps"
 apps_config | xargs -l bash -c 'download_app $@' -
+if [[ ${CONFIG_FILE} == *"with-gapps"* ]]; then
+  DL_PATH=system/${OVERLAY_PATH_ON_SYSTEM}
+  mkdir --parents $DL_PATH
+  wget \
+  --no-verbose \
+  --output-document=${DL_PATH}/${OVERLAY_FILENAME} \
+  https://github.com/greenflash1986/UnifiedNlpOverlay/releases/download/v0.1/UnifiedNlpOverlay.apk
+fi
 
 echo "~~~ Making OTA survival script"
 cat templates/addond-head > $ADDOND_FILE
 apps_config | awk '{sub("/system/", "", $4); printf "%1$s/%2$s.apk\n%1$s/%2$s/%2$s.apk\n", $4, $3}' >> $ADDOND_FILE
+if [[ ${CONFIG_FILE} == *"with-gapps"* ]]; then
+  echo ${OVERLAY_PATH_ON_SYSTEM}/${OVERLAY_FILENAME} >> $ADDOND_FILE
+fi
 cat templates/addond-tail >> $ADDOND_FILE
 
 echo "~~~ Making permission-file"
