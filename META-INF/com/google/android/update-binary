@@ -32,23 +32,31 @@ mkdir $WORK_FOLDER
 cd $WORK_FOLDER
 unzip -o "$ZIP_FILE"
 
-mount /system
-# A/B system-as-root devices have the actual system partition
-# mounted under /system/system when in the recovery.
-# All Android 10 devices act as system-as-root devices.
-SYSTEM_AS_ROOT="$(getprop ro.build.system_root_image)"
-if [ "$SYSTEM_AS_ROOT" == "true" ]
-then # we are on an Android Pie device with A/B system-as-root layout
-  SYSTEM_ROOT="/system/system"
-elif [ -f "/system/system/build.prop" ]
-then # we are on an Android 10 device
-  SYSTEM_AS_ROOT="true"
-  SYSTEM_ROOT="/system/system"
+if mount /system
+then
+  UMOUNT_FOLDER=/system
+  # A/B system-as-root devices have the actual system partition
+  # mounted under /system/system when in the recovery.
+  # All Android 10 devices act as system-as-root devices.
+  SYSTEM_AS_ROOT="$(getprop ro.build.system_root_image)"
+  if [ "$SYSTEM_AS_ROOT" == "true" ]
+  then # we are on an Android Pie device with A/B system-as-root layout
+    SYSTEM_ROOT="/system/system"
+  elif [ -f "/system/system/build.prop" ]
+  then # we are on an Android 10 device
+    SYSTEM_AS_ROOT="true"
+    SYSTEM_ROOT="/system/system"
+  fi
+else
+  mount /system_root || (echo -n -e 'ui_print Could not mount system_root...\n' > /proc/self/fd/$2; exit 1)
+  UMOUNT_FOLDER=/system_root
+  SYSTEM_ROOT="/system_root/system"
 fi
+
 
 echo -n -e 'ui_print Installing apps...\n' > /proc/self/fd/$2
 
-# Prepare work folder
+# Prepare directory structure: change source according to target
 BUILD_VERSION_SDK="$(grep -F ro.build.version.sdk ${SYSTEM_ROOT}/build.prop)"
 BUILD_VERSION_SDK_INT="${BUILD_VERSION_SDK#*=}"
 if [ "${BUILD_VERSION_SDK_INT}" -ge 21 ]
@@ -86,17 +94,16 @@ echo "$TARGET_DIRS" | xargs -n 1 chmod 755
 
 
 echo -n -e 'ui_print Installing OTA survival script...\n' > /proc/self/fd/$2
-
 cp ${ADDOND} ${SYSTEM_ROOT}/addon.d/
+echo -n -e 'ui_print Installed OTA survival script.\n' > /proc/self/fd/$2
 
 if [ "${BUILD_VERSION_SDK_INT}" -ge 27 ]
 then # Android 8+ require an explicit permission whitelist file for privileged apps
   echo -n -e 'ui_print Whitelisting privapp permissions...\n' > /proc/self/fd/$2
-
   cp ${PRIVAPP_PERMISSIONS} ${SYSTEM_ROOT}/etc/permissions/
 fi
 
 echo -n -e 'ui_print done\n' > /proc/self/fd/$2
 echo -n -e 'ui_print\n' > /proc/self/fd/$2
 
-umount /system
+umount $UMOUNT_FOLDER
