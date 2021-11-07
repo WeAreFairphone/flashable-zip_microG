@@ -80,27 +80,26 @@ else # all apks reside in /system/app
   rm -rf {} \;
 fi
 
-TARGET_APKS="$(find system -name *.apk | sed -e 's/^/\//')"
-TARGET_DIRS="$(find system -mindepth 2 -type d | sed -e 's/^/\//')"
-
-# Delete old files and folders
-echo "$TARGET_APKS" | xargs -n 1 rm -f
-echo "$TARGET_DIRS" | xargs -n 1 rm -rf
+TARGET_APKS="$(find system -name "*.apk" | sed -e 's|^system|'"${SYSTEM_ROOT}"'|')"
+TARGET_DIRS="$(find system -mindepth 2 -type d | sed -e 's|^system|'"${SYSTEM_ROOT}"'|')"
 
 # Copy new files and fix permissions
 cp -r system/* ${SYSTEM_ROOT}/
-echo "$TARGET_APKS" | xargs -n 1 chmod 644
-echo "$TARGET_DIRS" | xargs -n 1 chmod 755
+echo -n "$TARGET_APKS" | xargs -n 1 chmod 644
+echo -n "$TARGET_DIRS" | xargs -n 1 chmod 755
 
 
 echo -n -e 'ui_print Installing OTA survival script...\n' > /proc/self/fd/$2
 cp ${ADDOND} ${SYSTEM_ROOT}/addon.d/
+chmod 755 ${SYSTEM_ROOT}/addon.d/${ADDOND}
 echo -n -e 'ui_print Installed OTA survival script.\n' > /proc/self/fd/$2
+
 
 if [ "${BUILD_VERSION_SDK_INT}" -ge 27 ]
 then # Android 8+ require an explicit permission whitelist file for privileged apps
   echo -n -e 'ui_print Whitelisting privapp permissions...\n' > /proc/self/fd/$2
   cp ${PRIVAPP_PERMISSIONS} ${SYSTEM_ROOT}/etc/permissions/
+  chmod 644 ${SYSTEM_ROOT}/etc/permissions/${PRIVAPP_PERMISSIONS}
 fi
 
 echo -n -e 'ui_print done\n' > /proc/self/fd/$2
